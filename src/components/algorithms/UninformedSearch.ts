@@ -1,6 +1,6 @@
-/* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unnecessary-condition */
 /* eslint-disable no-constant-condition */
+import { Map } from "../Map";
 import { Node } from "./Node";
 
 export class UninformedSearch {
@@ -8,19 +8,16 @@ export class UninformedSearch {
 	private readonly explored: Node[] = [];
 	private exploredCount = 0;
 
-	constructor(public readonly map: number[][]) {
-		console.log(map);
-	}
+	constructor(public readonly map: Map) {}
 
 	solve(): { cells: [number, number][]; explored: Node[] } {
-		const start = this.getStartPoint();
-		const goal = this.getGoalPoint();
+		const start = this.map.getStartPoint();
+		const goal = this.map.getGoalPoint();
 
 		if (!start) {
 			throw new Error("Start Point not defined");
 		}
 		this.add(start);
-		console.log("start", start);
 
 		while (true) {
 			if (this.isEmpty()) {
@@ -67,32 +64,6 @@ export class UninformedSearch {
 		}
 	}
 
-	getStartPoint(): Node | null {
-		for (let row = 0; row < this.map.length; row++) {
-			for (let column = 0; column < this.map[row].length; column++) {
-				const tile = this.map[row][column];
-				if (tile === 4) {
-					return new Node([row, column], null, null);
-				}
-			}
-		}
-
-		return null;
-	}
-
-	getGoalPoint(): Node | null {
-		for (let row = 0; row < this.map.length; row++) {
-			for (let column = 0; column < this.map[row].length; column++) {
-				const tile = this.map[row][column];
-				if (tile === 0) {
-					return new Node([row, column], null, null);
-				}
-			}
-		}
-
-		return null;
-	}
-
 	add(node: Node): void {
 		this.frontier.push(node);
 	}
@@ -116,12 +87,12 @@ export class UninformedSearch {
 
 		for (const candidate of candidates) {
 			if (
-				!(candidate.x >= this.map.length) &&
+				!(candidate.x >= this.map.value.length) &&
 				!(candidate.x < 0) &&
-				!(candidate.y >= this.map[0].length) &&
+				!(candidate.y >= this.map.value[0].length) &&
 				!(candidate.y < 0)
 			) {
-				const neighborNode = this.map[candidate?.x][candidate?.y];
+				const neighborNode = this.map.value[candidate?.x][candidate?.y];
 				const isVisited = this.explored.find((node) => node.id === `${candidate.x}${candidate.y}`);
 				if (node && neighborNode !== undefined && neighborNode !== 1 && !isVisited) {
 					neighbors.push(new Node([candidate.x, candidate.y], node, null));

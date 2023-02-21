@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useMemo, useRef } from "react";
 
 import wallImage from "../assets/images/wall.png";
 import yellowDotImage from "../assets/images/yellowDot.png";
@@ -6,7 +6,7 @@ import { BFS } from "./algorithms/BFS";
 import { DFS } from "./algorithms/DFS";
 import { Node } from "./algorithms/Node";
 import { UninformedSearch } from "./algorithms/UninformedSearch";
-import { maze01 } from "./mazes/maze01";
+import { Map } from "./Map";
 
 const draw = (canvas: HTMLCanvasElement | null, map: number[][], tileSize: number) => {
 	const yellowDot = new Image();
@@ -93,7 +93,7 @@ const solve = (
 };
 
 const Canvas = () => {
-	const map = maze01;
+	const map = useMemo(() => new Map(), []);
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const tileSize = 32;
 
@@ -104,14 +104,18 @@ const Canvas = () => {
 			return;
 		}
 
-		draw(canvas, map, tileSize);
+		draw(canvas, map.value, tileSize);
 	}, [map]);
 
 	return (
 		<>
 			<canvas ref={canvasRef} />
-			<button onClick={() => solve(new DFS(map), canvasRef.current, map, tileSize)}>DFS</button>
-			<button onClick={() => solve(new BFS(map), canvasRef.current, map, tileSize)}>BSF</button>
+			<button onClick={() => solve(new DFS(map), canvasRef.current, map.value, tileSize)}>
+				DFS
+			</button>
+			<button onClick={() => solve(new BFS(map), canvasRef.current, map.value, tileSize)}>
+				BSF
+			</button>
 		</>
 	);
 };
