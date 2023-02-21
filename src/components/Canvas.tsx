@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef } from "react";
 
 import wallImage from "../assets/images/wall.png";
 import yellowDotImage from "../assets/images/yellowDot.png";
+import { A, WeightedNode } from "./algorithms/A";
 import { BFS } from "./algorithms/BFS";
 import { DFS } from "./algorithms/DFS";
 import { Node } from "./algorithms/Node";
@@ -43,17 +44,36 @@ const draw = (canvas: HTMLCanvasElement | null, map: number[][], tileSize: numbe
 	}
 };
 
-const showPath = (cells: [number, number][], ctx: CanvasRenderingContext2D, tileSize: number) => {
-	cells.forEach((cell) => {
+const showPath = (nodes: Node[], ctx: CanvasRenderingContext2D, tileSize: number) => {
+	nodes.forEach((node) => {
+		// eslint-disable-next-line no-console
 		ctx.fillStyle = "purple";
-		ctx.fillRect(cell[1] * tileSize, cell[0] * tileSize, tileSize, tileSize);
+		ctx.fillRect(node.point[1] * tileSize, node.point[0] * tileSize, tileSize, tileSize);
+		if ((node as WeightedNode).weight) {
+			ctx.fillStyle = "white";
+			ctx.font = "15pt Calibri";
+			ctx.fillText(
+				(node as WeightedNode).weight.toString(),
+				node.point[1] * tileSize,
+				node.point[0] * tileSize
+			);
+		}
 	});
 };
 
 const showExplored = (nodes: Node[], ctx: CanvasRenderingContext2D, tileSize: number) => {
 	nodes.forEach((node) => {
-		ctx.fillStyle = "white";
+		ctx.fillStyle = "gray";
 		ctx.fillRect(node.point[1] * tileSize, node.point[0] * tileSize, tileSize, tileSize);
+		if ((node as WeightedNode).weight) {
+			ctx.fillStyle = "white";
+			ctx.font = "15pt Calibri";
+			ctx.fillText(
+				(node as WeightedNode).weight.toString(),
+				node.point[1] * tileSize,
+				node.point[0] * tileSize
+			);
+		}
 	});
 };
 
@@ -89,7 +109,7 @@ const solve = (
 
 	const solution = algorithm.solve();
 	showExplored(solution.explored, ctx, tileSize);
-	showPath(solution.cells, ctx, tileSize);
+	showPath(solution.nodes, ctx, tileSize);
 };
 
 const Canvas = () => {
@@ -116,6 +136,7 @@ const Canvas = () => {
 			<button onClick={() => solve(new BFS(map), canvasRef.current, map.value, tileSize)}>
 				BSF
 			</button>
+			<button onClick={() => solve(new A(map), canvasRef.current, map.value, tileSize)}>A*</button>
 		</>
 	);
 };

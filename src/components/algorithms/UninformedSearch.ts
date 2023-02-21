@@ -10,8 +10,10 @@ export class UninformedSearch {
 
 	constructor(public readonly map: Map) {}
 
-	solve(): { cells: [number, number][]; explored: Node[] } {
+	solve(): { cells: [number, number][]; explored: Node[]; nodes: Node[] } {
 		const start = this.map.getStartPoint();
+		// eslint-disable-next-line no-console
+		console.log(start);
 		const goal = this.map.getGoalPoint();
 
 		if (!start) {
@@ -28,15 +30,19 @@ export class UninformedSearch {
 			if (node?.point[0] === goal?.point[0] && node?.point[1] === goal?.point[1]) {
 				let currentNode = node;
 				const cells: [number, number][] = [];
+				const nodes: Node[] = [];
 				while (currentNode?.parent !== null && currentNode?.parent !== undefined) {
 					cells.push(currentNode.point);
+					nodes.push(currentNode);
 					currentNode = currentNode.parent;
 				}
 				cells.shift();
+				nodes.shift();
 
 				return {
 					cells,
 					explored: this.explored,
+					nodes,
 				};
 			}
 			this.exploredCount++;
