@@ -2,6 +2,10 @@ import { useEffect, useRef } from "react";
 
 import wallImage from "../assets/images/wall.png";
 import yellowDotImage from "../assets/images/yellowDot.png";
+import { BFS } from "./algorithms/BFS";
+import { DFS } from "./algorithms/DFS";
+import { Node } from "./algorithms/Node";
+import { UninformedSearch } from "./algorithms/UninformedSearch";
 import { maze01 } from "./mazes/maze01";
 
 const draw = (
@@ -29,12 +33,41 @@ const draw = (
 	}
 };
 
+const showPath = (cells: [number, number][], ctx: CanvasRenderingContext2D, tileSize: number) => {
+	cells.forEach((cell) => {
+		ctx.fillStyle = "purple";
+		ctx.fillRect(cell[1] * tileSize, cell[0] * tileSize, tileSize, tileSize);
+	});
+};
+
+const showExplored = (nodes: Node[], ctx: CanvasRenderingContext2D, tileSize: number) => {
+	nodes.forEach((node) => {
+		ctx.fillStyle = "white";
+		ctx.fillRect(node.point[1] * tileSize, node.point[0] * tileSize, tileSize, tileSize);
+	});
+};
+
+const solve = (
+	algorithm: UninformedSearch,
+	ctx: CanvasRenderingContext2D | null,
+	tileSize: number
+) => {
+	if (!ctx) {
+		return;
+	}
+	const solution = algorithm.solve();
+	showExplored(solution.explored, ctx, tileSize);
+	showPath(solution.cells, ctx, tileSize);
+};
+
 const Canvas = () => {
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const map = maze01;
 	const tileSize = 32;
 	const yellowDot = new Image();
 	const wall = new Image();
+	let context: null | CanvasRenderingContext2D;
+
 	yellowDot.src = yellowDotImage;
 	wall.src = wallImage;
 
@@ -48,7 +81,7 @@ const Canvas = () => {
 		canvas.width = map[0].length * tileSize;
 		canvas.height = map.length * tileSize;
 
-		const context = canvas.getContext("2d");
+		context = canvas.getContext("2d");
 
 		if (!context) {
 			return;
@@ -57,7 +90,14 @@ const Canvas = () => {
 		draw(context, map, 32, wall, yellowDot);
 	}, [map, wall, yellowDot]);
 
-	return <canvas ref={canvasRef} />;
+	return (
+		<>
+			<canvas ref={canvasRef} />
+			<button onClick={() => solve(new DFS(map), context, tileSize)}>DFS</button>
+			<button onClick={() => solve(new BFS(map), context, tileSize)}>BSF</button>
+			<button>A*</button>
+		</>
+	);
 };
 
 export default Canvas;
