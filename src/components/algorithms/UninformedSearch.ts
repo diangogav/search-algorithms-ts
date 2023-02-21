@@ -12,8 +12,6 @@ export class UninformedSearch {
 
 	solve(): { cells: [number, number][]; explored: Node[]; nodes: Node[] } {
 		const start = this.map.getStartPoint();
-		// eslint-disable-next-line no-console
-		console.log(start);
 		const goal = this.map.getGoalPoint();
 
 		if (!start) {

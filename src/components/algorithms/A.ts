@@ -20,8 +20,6 @@ export class A extends UninformedSearch {
 			throw new Error("Goal not found...");
 		}
 		this.goal = goal;
-		// eslint-disable-next-line no-console
-		console.log(this.goal);
 	}
 
 	add(node: Node): void {
