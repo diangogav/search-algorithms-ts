@@ -8,13 +8,23 @@ import { Node } from "./algorithms/Node";
 import { UninformedSearch } from "./algorithms/UninformedSearch";
 import { maze01 } from "./mazes/maze01";
 
-const draw = (
-	ctx: CanvasRenderingContext2D,
-	map: number[][],
-	tileSize: number,
-	wall: HTMLImageElement,
-	yellowDot: HTMLImageElement
-) => {
+const draw = (canvas: HTMLCanvasElement | null, map: number[][], tileSize: number) => {
+	const yellowDot = new Image();
+	const wall = new Image();
+
+	yellowDot.src = yellowDotImage;
+	wall.src = wallImage;
+	if (!canvas) {
+		return;
+	}
+
+	canvas.width = map[0].length * tileSize;
+	canvas.height = map.length * tileSize;
+
+	const ctx = canvas.getContext("2d");
+	if (!ctx) {
+		return;
+	}
 	for (let row = 0; row < map.length; row++) {
 		for (let column = 0; column < map[row].length; column++) {
 			const tile = map[row][column];
@@ -47,29 +57,45 @@ const showExplored = (nodes: Node[], ctx: CanvasRenderingContext2D, tileSize: nu
 	});
 };
 
+const clear = (canvas: HTMLCanvasElement | null, map: number[][], tileSize: number) => {
+	if (!canvas) {
+		return;
+	}
+	const context = canvas.getContext("2d");
+	if (!context) {
+		return;
+	}
+	context.clearRect(0, 0, canvas.width, canvas.height);
+
+	draw(canvas, map, tileSize);
+};
+
 const solve = (
 	algorithm: UninformedSearch,
-	ctx: CanvasRenderingContext2D | null,
+	canvas: HTMLCanvasElement | null,
+	map: number[][],
 	tileSize: number
 ) => {
+	if (!canvas) {
+		return;
+	}
+	const ctx = canvas.getContext("2d");
+
 	if (!ctx) {
 		return;
 	}
+
+	clear(canvas, map, tileSize);
+
 	const solution = algorithm.solve();
 	showExplored(solution.explored, ctx, tileSize);
 	showPath(solution.cells, ctx, tileSize);
 };
 
 const Canvas = () => {
-	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const map = maze01;
+	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const tileSize = 32;
-	const yellowDot = new Image();
-	const wall = new Image();
-	let context: null | CanvasRenderingContext2D;
-
-	yellowDot.src = yellowDotImage;
-	wall.src = wallImage;
 
 	useEffect(() => {
 		const canvas = canvasRef.current;
@@ -78,24 +104,14 @@ const Canvas = () => {
 			return;
 		}
 
-		canvas.width = map[0].length * tileSize;
-		canvas.height = map.length * tileSize;
-
-		context = canvas.getContext("2d");
-
-		if (!context) {
-			return;
-		}
-
-		draw(context, map, 32, wall, yellowDot);
-	}, [map, wall, yellowDot]);
+		draw(canvas, map, tileSize);
+	}, [map]);
 
 	return (
 		<>
 			<canvas ref={canvasRef} />
-			<button onClick={() => solve(new DFS(map), context, tileSize)}>DFS</button>
-			<button onClick={() => solve(new BFS(map), context, tileSize)}>BSF</button>
-			<button>A*</button>
+			<button onClick={() => solve(new DFS(map), canvasRef.current, map, tileSize)}>DFS</button>
+			<button onClick={() => solve(new BFS(map), canvasRef.current, map, tileSize)}>BSF</button>
 		</>
 	);
 };
